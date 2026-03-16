@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wells Fargo Technology Org Chart</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
+
+:root {
+  --red: #C8102E;
+  --gold: #FFCD00;
+  --dark: #111111;
+  --mid: #444444;
+  --light: #F7F5F0;
+  --white: #FFFFFF;
+  --border: #DDD9D0;
+  --shadow: rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  color: var(--dark);
+  min-height: 100vh;
+}
+
+#header {
+  background: var(--red);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 3px 16px rgba(200,16,46,0.35);
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+
+.brand-icon {
+  width: 44px; height: 44px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.brand h1 {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 18px; color: white; letter-spacing: 0.01em; line-height: 1.2;
+}
+
+.brand p {
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  letter-spacing: 0.07em; text-transform: uppercase; margin-top: 2px;
+}
+
+.toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+#searchInput {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px; padding: 7px 13px;
+  color: white; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; width: 200px; outline: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+#searchInput::placeholder { color: rgba(255,255,255,0.5); }
+#searchInput:focus { background: rgba(255,255,255,0.22); border-color: var(--gold); }
+
+.btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px; padding: 7px 13px;
+  color: white; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.15s; white-space: nowrap;
+}
+.btn:hover { background: rgba(255,255,255,0.22); }
+.btn.accent { background: var(--gold); color: var(--dark); border-color: var(--gold); font-weight: 600; }
+.btn.accent:hover { background: #e6b800; }
+
+#legend {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 10px 32px; display: flex; align-items: center;
+  gap: 20px; flex-wrap: wrap; font-size: 12px; color: var(--mid);
+}
+.legend-label { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 10px; }
+.leg { display: flex; align-items: center; gap: 5px; }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.hint { margin-left: auto; font-size: 11px; font-style: italic; color: #999; }
+
+#canvas { padding: 40px 24px 80px; overflow-x: auto; }
+
+.tree { display: flex; flex-direction: column; align-items: center; }
+.node-block { display: flex; flex-direction: column; align-items: center; }
+
+.node {
+  background: white; border-radius: 8px; padding: 11px 15px;
+  min-width: 190px; max-width: 250px; cursor: pointer;
+  border: 2px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative; user-select: none;
+}
+.node:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+.node[data-level="0"] { background: var(--red); border-color: var(--red); color: white; min-width: 220px; }
+.node[data-level="1"] { border-left: 4px solid #8B1A2E; }
+.node[data-level="2"] { border-left: 4px solid #1A4B8C; }
+.node[data-level="3"] { border-left: 4px solid #1A6644; }
+.node[data-level="4"] { border-left: 4px solid #7A5C1E; }
+
+.node-name { font-weight: 600; font-size: 13px; line-height: 1.3; }
+.node[data-level="0"] .node-name { font-family: 'Libre Baskerville', serif; font-size: 14px; }
+.node-title { font-size: 11px; line-height: 1.4; margin-top: 3px; color: var(--mid); font-weight: 400; }
+.node[data-level="0"] .node-title { color: var(--gold); font-weight: 500; }
+
+.node-notes {
+  font-size: 10px; line-height: 1.4; margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid var(--border); color: #777; font-style: italic; display: none;
+}
+.node[data-level="0"] .node-notes { border-top-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.75); }
+.node.open .node-notes { display: block; }
+
+.ea-tag {
+  display: inline-block; background: #FFF3CC; color: #7A5C1E;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; padding: 2px 5px; border-radius: 3px; margin-bottom: 5px;
+}
+
+.badge {
+  display: inline-block; background: var(--red); color: white;
+  font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 10px; margin-left: 4px; vertical-align: middle;
+}
+.node[data-level="0"] .badge { background: rgba(255,255,255,0.25); }
+
+.tog {
+  position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 22px; background: var(--red); color: white;
+  border: 2px solid white; border-radius: 50%; font-size: 13px;
+  font-weight: 700; line-height: 18px; text-align: center;
+  cursor: pointer; z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  transition: background 0.15s, transform 0.15s;
+}
+.tog:hover { background: var(--dark); transform: translateX(-50%) scale(1.1); }
+
+.v-line { width: 2px; height: 22px; background: var(--border); }
+.children-wrap { display: flex; flex-direction: column; align-items: center; }
+
+.h-row {
+  display: flex; gap: 14px; justify-content: center;
+  position: relative; padding-top: 22px;
+}
+.h-row::before {
+  content: ''; position: absolute; top: 0; left: 50%;
+  width: 2px; height: 22px; background: var(--border); transform: translateX(-50%);
+}
+.h-row.multi::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--border);
+}
+
+.child-col { display: flex; flex-direction: column; align-items: center; position: relative; }
+.child-col::before {
+  content: ''; position: absolute; top: 0; left: 50%;
+  width: 2px; height: 22px; background: var(--border); transform: translateX(-50%);
+}
+
+.collapsed { display: none !important; }
+.dimmed { opacity: 0.15 !important; }
+.highlighted { outline: 3px solid var(--gold) !important; outline-offset: 2px; }
+
+@media print {
+  #header .toolbar { display: none; }
+  #legend .hint { display: none; }
+  body { background: white; }
+  #canvas { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="brand">
+    <div class="brand-icon">🏦</div>
+    <div>
+      <h1>Wells Fargo Technology</h1>
+      <p>Organization Chart</p>
+    </div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Search name or title...">
+    <button class="btn" onclick="expandAll()">Expand All</button>
+    <button class="btn" onclick="collapseAll()">Collapse All</button>
+    <button class="btn accent" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</div>
+
+<div id="legend">
+  <span class="legend-label">Key:</span>
+  <div class="leg"><div class="leg-dot" style="background:#C8102E"></div> CEO</div>
+  <div class="leg"><div class="leg-dot" style="background:#8B1A2E"></div> Head of Technology</div>
+  <div class="leg"><div class="leg-dot" style="background:#1A4B8C"></div> Direct Reports</div>
+  <div class="leg"><div class="leg-dot" style="background:#1A6644"></div> L3 Reports</div>
+  <div class="leg"><div class="leg-dot" style="background:#7A5C1E"></div> L4 Reports</div>
+  <span class="hint">Click a card to reveal notes • Use +/- to expand or collapse teams</span>
+</div>
+
+<div id="canvas"></div>
+
+<script>
+const ORG_DATA = [
+  { name: "Charlie Scharf", reportsTo: "", title: "Chairman & CEO" },
+  { name: "Bridget Engle", reportsTo: "Charlie Scharf", title: "Head of Technology" },
+
+  // Reports to Bridget Engle
+  { name: "Joe Sieczkowski", reportsTo: "Bridget Engle", title: "EVP - CIO | Chief Architect | Board Member" },
+  { name: "Scott Coleman", reportsTo: "Bridget Engle", title: "EVP, Technology Business Development" },
+  { name: "Chintan Mehta", reportsTo: "Bridget Engle", title: "EVP, CIO - Digital, Innovation and Strategy & Technology Fellow", notes: "Head of Digital Technology at Wells Fargo" },
+  { name: "Tracy Kerrins", reportsTo: "Bridget Engle", title: "Global Chief Information Officer", notes: "Consumer CIO" },
+  { name: "Michael Deninno", reportsTo: "Bridget Engle", title: "Chief Information Officer", notes: "Executive Vice President at Wells Fargo" },
+  { name: "Sarah Berwick", reportsTo: "Bridget Engle", title: "CIO Commercial and Corporate & Investment Banking Technology", notes: "Scalable trading, sales and research platforms across all Investment Banking products" },
+  { name: "Ken Meyer", reportsTo: "Bridget Engle", title: "CIO of Enterprise Functions Technology", notes: "IT Delivery, Architecture, Business Process Design, Banking, IT Strategy" },
+  { name: "Jeffrey Sousa", reportsTo: "Bridget Engle", title: "EVP COO Technology", notes: "Business plans, optimizing operational performance, corporate strategy execution" },
+  { name: "Brian Doyle", reportsTo: "Bridget Engle", title: "Managing Director", notes: "From BofA, Citi & Barclays" },
+  { name: "Ashley Regner", reportsTo: "Bridget Engle", title: "Global Chief Data and Analytics Officer | Global CIO | EVP" },
+  { name: "Elizabeth Kronyak", reportsTo: "Bridget Engle", title: "EA to Bridget Engle", isEA: true },
+
+  // Tiago Spritzer org
+  { name: "Tiago Spritzer", reportsTo: "Bridget Engle", title: "EVP, Group Chief Information Officer", notes: "Located in Dallas. Leads technology strategy, operations, and delivery" },
+  { name: "Chad Ballard", reportsTo: "Tiago Spritzer", title: "CIO, Shared Service Operations", notes: "Online, Mobility, ATM, VRU, and Branch channels" },
+  { name: "Chitra Hota", reportsTo: "Tiago Spritzer", title: "CIO, Managing Director, Head of Data and Analytics COO Technology", notes: "Large scale execution of cloud-based Data and Analytics platforms" },
+  { name: "Tracey Bentley", reportsTo: "Tiago Spritzer", title: "SVP Business Services Executive", notes: "Chief of staff managing organization health and strategy" },
+  { name: "Stefano Peroni", reportsTo: "Tiago Spritzer", title: "CIO - Wells Fargo Global Operation" },
+  { name: "Arash Sangari", reportsTo: "Tiago Spritzer", title: "CIO - Cognitive AI Solutions" },
+  { name: "Shanmugam Ramanathan", reportsTo: "Tiago Spritzer", title: "Head of COO Technology India & Philippines" },
+  { name: "Tata S. Rao", reportsTo: "Tiago Spritzer", title: "Head of Generative AI, Cloud Migration, and Chief Architect for TCOO" },
+  { name: "Indira Korrapati", reportsTo: "Tiago Spritzer", title: "Head of Risk Technology", notes: "Enterprise technology solutions for DFAST, CCAR, Risk Analytics and Risk Data Aggregation" },
+  { name: "Jon Fein", reportsTo: "Tiago Spritzer", title: "Managing Director, CIO", notes: "Enterprise Systems | Business Transformation | Shared Services | Global Operations" },
+  { name: "Ann Marie Facciolini", reportsTo: "Tiago Spritzer", title: "CIO - Head of Wholesale Operations Technology" },
+  { name: "Al Ramos", reportsTo: "Tiago Spritzer", title: "Head of Platform and Infrastructure Transformation, AI & Automation Enablement", notes: "NEW - 5 months in, from Stanley Morgan" },
+  { name: "Zehra T. Venugopal", reportsTo: "Tiago Spritzer", title: "EVP, CIO of Fraud and Claims Technology" },
+
+  // Munish Kumar org
+  { name: "Munish Kumar", reportsTo: "Bridget Engle", title: "Chief Information Security Officer", notes: "Cyber Security | Reduce Friction | Deliver Results" },
+  { name: "Christian Adam", reportsTo: "Munish Kumar", title: "Managing Director - Information Security" },
+  { name: "Ajoy Kumar", reportsTo: "Munish Kumar", title: "EVP & Head of Application Security", notes: "CISO, Head of Cyber Risk, Head of Tech Risk, Head of Application Security" },
+  { name: "Krishna M Singh", reportsTo: "Munish Kumar", title: "MD & Chief Development Officer (CDO)", notes: "Content management platforms and cloud-enabled applications" },
+  { name: "Alex Lazen", reportsTo: "Munish Kumar", title: "Managing Director - ITAM", notes: "ITAM & IAM Transformation | Cybersecurity & ITSM Modernization" },
+  { name: "Jenny Colacicco", reportsTo: "Munish Kumar", title: "Executive MD - Head of Governance, Risk & Compliance - Cybersecurity" },
+  { name: "Amit Mehta", reportsTo: "Munish Kumar", title: "MD - Head of Office of the CISO", notes: "Strategy & Transformation Leader, FinTech, Commercial & Retail Banking" },
+  { name: "Constantin Gonciulea", reportsTo: "Munish Kumar", title: "Head of Cybersecurity AI Capabilities and Innovation" },
+  { name: "Ramin Safai", reportsTo: "Munish Kumar", title: "Executive Vice President - Information Security", notes: "IAM, cloud security, infrastructure security, vulnerability management" },
+  { name: "Ali Iloglu", reportsTo: "Munish Kumar", title: "Technology Executive - CTO and CISO Organization", notes: "Security and Network Services" },
+  { name: "Amy R Nichols", reportsTo: "Munish Kumar", title: "Managing Director, Cyber Human Defense, Third Party Security and Cyber Platform", notes: "Governance, 3rd party, 35 years at Wells Fargo" },
+  { name: "Carole R. Kavanagh", reportsTo: "Munish Kumar", title: "EA to Munish Kumar", isEA: true },
+
+  // Matthew Simmons org
+  { name: "Matthew Simmons", reportsTo: "Munish Kumar", title: "Head of Business Information Security Officers (Managing Director)" },
+  { name: "Jason N. Buck", reportsTo: "Matthew Simmons", title: "Business Execution Director, Cloud Workload Lifecycle Security" },
+  { name: "Robert H. Bradford", reportsTo: "Matthew Simmons", title: "Enterprise Cybersecurity Vulnerability Governance Leader" },
+  { name: "Alan Mierzon", reportsTo: "Matthew Simmons", title: "Business Information Security Officer", notes: "Enterprise Security Architecture, Cyber Security, Privileged Access Management" },
+  { name: "Nitin Pandey", reportsTo: "Matthew Simmons", title: "Cybersecurity | Data Governance Executive" },
+  { name: "Richard Fairhurst", reportsTo: "Matthew Simmons", title: "International BISO", notes: "Cybersecurity Leader | CISO" },
+  { name: "William Edmond", reportsTo: "Matthew Simmons", title: "VP, Information Security Senior Manager - Vulnerability Assessment & Threat Services" },
+  { name: "Mark Zablotny", reportsTo: "Matthew Simmons", title: "SVP, Digital Product Management Director - Vulnerability Management" },
+  { name: "Donald W. Hinkle", reportsTo: "Matthew Simmons", title: "Technology Area Senior Manager", notes: "Project management" },
+  { name: "Hilda Munguia Valencia", reportsTo: "Matthew Simmons", title: "EA to Matthew Simmons", isEA: true },
+
+  // Beverly Young org
+  { name: "Beverly Young", reportsTo: "Matthew Simmons", title: "Cybersecurity - Technology Business Systems Senior Manager", notes: "Oversees enterprise patching and process governance" },
+  { name: "Jeremie Meitz", reportsTo: "Beverly Young", title: "VP, Lead Technology Business Services Consultant, Cyber Security Technology" },
+  { name: "Maya Paul", reportsTo: "Beverly Young", title: "Information Security" },
+  { name: "Sara-Marie Miller", reportsTo: "Beverly Young", title: "Business Accountability Specialist, Assistant Vice President" },
+  { name: "Ray Nath", reportsTo: "Beverly Young", title: "VP, Lead Information Security Analyst" },
+  { name: "Laura Hill", reportsTo: "Beverly Young", title: "Information Security Analyst" },
+  { name: "Albert Bowman", reportsTo: "Beverly Young", title: "Lead Technology Operations Analyst, VP" },
+  { name: "Patrick Hood", reportsTo: "Beverly Young", title: "Lead Technology Business Services Consultant" },
+  { name: "Sophia Graham", reportsTo: "Beverly Young", title: "Senior Information Technology Security Analyst", notes: "Risk & compliance workflow & data integrity" },
+  { name: "Amy Warren", reportsTo: "Beverly Young", title: "Lead Business Execution Consultant" },
+
+  // David Ritenour org
+  { name: "David Ritenour", reportsTo: "Munish Kumar", title: "Technology Senior Executive" },
+  { name: "Caleb Chitwood", reportsTo: "David Ritenour", title: "Head of Cyber Incident Detection and Response", notes: "NEW - 9 months in, from HCA Healthcare" },
+  { name: "David S. Spizzirro", reportsTo: "David Ritenour", title: "Head of Cybersecurity Solutions Engineering" },
+  { name: "Ryan Linn", reportsTo: "David Ritenour", title: "Executive Director of Cyber Threat Management" },
+  { name: "Ronald Ramcharran", reportsTo: "David Ritenour", title: "Managing Director, Cyber Defense & Monitoring" },
+  { name: "George Rettas", reportsTo: "David Ritenour", title: "Managing Director - Global Head of Counter Threat Operations" },
+  { name: "Michael Dierickx", reportsTo: "David Ritenour", title: "Cybersecurity Leadership | Incident Response & Threat Hunting | 24x7 Security Operations" },
+  { name: "Nikhil Jhawar", reportsTo: "David Ritenour", title: "Cybersecurity / Threat Management", notes: "Cybersecurity, threat mgmt, security monitoring, IR, compliance" },
+  { name: "Kristina DeGeare", reportsTo: "David Ritenour", title: "EA to David Ritenour", isEA: true },
+];
+
+function buildTree() {
+  const byName = {};
+  ORG_DATA.forEach(p => { byName[p.name] = { ...p, children: [] }; });
+  let root = null;
+  ORG_DATA.forEach(p => {
+    if (!p.reportsTo) { root = byName[p.name]; }
+    else if (byName[p.reportsTo]) { byName[p.reportsTo].children.push(byName[p.name]); }
+  });
+  return root;
+}
+
+function assignLevels(node, level = 0) {
+  node.level = level;
+  node.children.forEach(c => assignLevels(c, level + 1));
+}
+
+function renderNode(node) {
+  const block = document.createElement('div');
+  block.className = 'node-block';
+
+  const card = document.createElement('div');
+  card.className = 'node';
+  card.dataset.level = Math.min(node.level, 4);
+  card.dataset.name = node.name.toLowerCase();
+  card.dataset.title = (node.title || '').toLowerCase();
+
+  let inner = '';
+  if (node.isEA) inner += '<div class="ea-tag">Executive Assistant</div>';
+  const badge = node.children.length ? `<span class="badge">${node.children.length}</span>` : '';
+  inner += `<div class="node-name">${node.name}${badge}</div>`;
+  if (node.title) inner += `<div class="node-title">${node.title}</div>`;
+  if (node.notes) inner += `<div class="node-notes">${node.notes}</div>`;
+  card.innerHTML = inner;
+
+  if (node.notes) {
+    card.addEventListener('click', e => {
+      if (e.target.classList.contains('tog')) return;
+      card.classList.toggle('open');
+    });
+  }
+
+  block.appendChild(card);
+
+  if (node.children.length) {
+    const tog = document.createElement('div');
+    tog.className = 'tog';
+    tog.textContent = '-';
+    tog.addEventListener('click', e => {
+      e.stopPropagation();
+      const wrap = block.querySelector(':scope > .children-wrap');
+      const isNowCollapsed = wrap.classList.toggle('collapsed');
+      tog.textContent = isNowCollapsed ? '+' : '-';
+    });
+    card.appendChild(tog);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'children-wrap';
+
+    const vLine = document.createElement('div');
+    vLine.className = 'v-line';
+    wrap.appendChild(vLine);
+
+    const row = document.createElement('div');
+    row.className = `h-row${node.children.length > 1 ? ' multi' : ''}`;
+
+    node.children.forEach(child => {
+      const col = document.createElement('div');
+      col.className = 'child-col';
+      col.appendChild(renderNode(child));
+      row.appendChild(col);
+    });
+
+    wrap.appendChild(row);
+    block.appendChild(wrap);
+  }
+
+  return block;
+}
+
+function expandAll() {
+  document.querySelectorAll('.children-wrap').forEach(w => w.classList.remove('collapsed'));
+  document.querySelectorAll('.tog').forEach(t => t.textContent = '-');
+}
+
+function collapseAll() {
+  document.querySelectorAll('.children-wrap').forEach(w => w.classList.add('collapsed'));
+  document.querySelectorAll('.tog').forEach(t => t.textContent = '+');
+}
+
+function doSearch(q) {
+  q = q.trim().toLowerCase();
+  const allCards = document.querySelectorAll('.node');
+  if (!q) {
+    allCards.forEach(c => c.classList.remove('dimmed', 'highlighted'));
+    return;
+  }
+  allCards.forEach(card => {
+    const match = card.dataset.name.includes(q) || card.dataset.title.includes(q);
+    card.classList.toggle('dimmed', !match);
+    card.classList.toggle('highlighted', match);
+    if (match) {
+      let el = card.parentElement;
+      while (el) {
+        if (el.classList.contains('children-wrap')) {
+          el.classList.remove('collapsed');
+          const togEl = el.previousElementSibling && el.previousElementSibling.querySelector('.tog');
+          if (togEl) togEl.textContent = '-';
+        }
+        el = el.parentElement;
+      }
+    }
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => doSearch(e.target.value));
+
+const root = buildTree();
+assignLevels(root);
+const tree = document.createElement('div');
+tree.className = 'tree';
+tree.appendChild(renderNode(root));
+document.getElementById('canvas').appendChild(tree);
+</script>
+
+</body>
+</html>
