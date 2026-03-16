@@ -16,12 +16,9 @@
   --white: #FFFFFF;
   --border: #E5E1D8;
   --shadow: rgba(0,0,0,0.06);
-  --spacing: 48px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { font-size: 16px; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -32,7 +29,7 @@ body {
 
 #header {
   background: linear-gradient(135deg, var(--red) 0%, #A0082A 100%);
-  padding: 24px 48px;
+  padding: 28px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,7 +52,7 @@ body {
 
 .brand h1 {
   font-family: 'Libre Baskerville', serif;
-  font-size: 28px; color: white; letter-spacing: 0.015em; line-height: 1.2; font-weight: 700;
+  font-size: 28px; color: white; letter-spacing: 0.015em; font-weight: 700;
 }
 
 .brand p {
@@ -99,128 +96,198 @@ body {
 .leg-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
 .hint { margin-left: auto; font-size: 12px; font-style: italic; color: #999; }
 
-#canvas { 
-  padding: 56px 48px 100px;
-  overflow: auto;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, transparent 20%);
+#container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 48px;
 }
 
-.tree { display: flex; flex-direction: column; align-items: center; }
-.node-block { display: flex; flex-direction: column; align-items: center; margin-bottom: var(--spacing); }
-
-.node {
-  background: white; border-radius: 12px; padding: 16px 20px;
-  min-width: 240px; max-width: 320px; cursor: pointer;
-  border: 2px solid var(--border);
-  box-shadow: 0 3px 12px var(--shadow);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative; user-select: none;
+.tree-item {
+  margin-bottom: 8px;
 }
-.node:hover { 
-  transform: translateY(-4px); 
-  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+
+.item-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.item-toggle:hover {
+  background: #FAFAF8;
   border-color: var(--red);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
-.node[data-level="0"] { 
-  background: linear-gradient(135deg, var(--red) 0%, #A0082A 100%);
-  border-color: var(--red); 
-  color: white; 
-  min-width: 280px;
-  box-shadow: 0 8px 24px rgba(200,16,46,0.2);
+.toggle-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--red);
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: transform 0.2s;
 }
-.node[data-level="0"]:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 36px rgba(200,16,46,0.3);
+
+.toggle-icon.collapsed {
+  transform: rotate(-90deg);
 }
 
-.node[data-level="1"] { border-left: 5px solid #8B1A2E; background: linear-gradient(to right, rgba(139,26,46,0.03) 0%, white 20%); }
-.node[data-level="2"] { border-left: 5px solid #1A4B8C; background: linear-gradient(to right, rgba(26,75,140,0.03) 0%, white 20%); }
-.node[data-level="3"] { border-left: 5px solid #1A6644; background: linear-gradient(to right, rgba(26,102,68,0.03) 0%, white 20%); }
-.node[data-level="4"] { border-left: 5px solid #7A5C1E; background: linear-gradient(to right, rgba(122,92,30,0.03) 0%, white 20%); }
-
-.node-name { font-weight: 700; font-size: 14px; line-height: 1.35; }
-.node[data-level="0"] .node-name { font-family: 'Libre Baskerville', serif; font-size: 18px; }
-.node-title { font-size: 12px; line-height: 1.5; margin-top: 5px; color: var(--mid); font-weight: 400; }
-.node[data-level="0"] .node-title { color: rgba(255,255,255,0.9); font-weight: 500; }
-
-.node-notes {
-  font-size: 11px; line-height: 1.5; margin-top: 8px; padding-top: 8px;
-  border-top: 1px solid var(--border); color: #666; font-style: italic; display: none;
+.toggle-icon.no-children {
+  background: #DDD;
+  color: #999;
+  cursor: default;
+  font-size: 12px;
 }
-.node[data-level="0"] .node-notes { border-top-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
-.node.open .node-notes { display: block; }
 
-.ea-tag {
-  display: inline-block; background: linear-gradient(135deg, #FFF3CC 0%, #FFEB99 100%);
-  color: #7A5C1E; font-size: 10px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 3px 7px; border-radius: 4px; margin-bottom: 6px;
+.item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--dark);
+}
+
+.item-title {
+  font-size: 13px;
+  color: var(--mid);
+  font-weight: 400;
+}
+
+.item-notes {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.item-badge {
+  background: var(--red);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.ea-badge {
+  background: linear-gradient(135deg, #FFF3CC 0%, #FFEB99 100%);
+  color: #7A5C1E;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
   border: 1px solid rgba(122,92,30,0.2);
 }
 
-.badge {
-  display: inline-block; background: var(--red); color: white;
-  font-size: 10px; font-weight: 700; padding: 2px 7px;
-  border-radius: 12px; margin-left: 6px; vertical-align: middle;
-}
-.node[data-level="0"] .badge { background: rgba(255,255,255,0.3); }
-
-.tog {
-  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-  width: 28px; height: 28px; background: var(--red); color: white;
-  border: 3px solid white; border-radius: 50%; font-size: 14px;
-  font-weight: 700; line-height: 22px; text-align: center;
-  cursor: pointer; z-index: 10;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  transition: all 0.2s;
-}
-.tog:hover { background: var(--dark); transform: translateX(-50%) scale(1.15); }
-
-.v-line { width: 3px; height: 28px; background: var(--border); }
-.children-wrap { display: flex; flex-direction: column; align-items: center; }
-
-.h-row {
-  display: flex; gap: 24px; justify-content: center;
-  position: relative; padding-top: 28px;
-}
-.h-row::before {
-  content: ''; position: absolute; top: 0; left: 50%;
-  width: 3px; height: 28px; background: var(--border); transform: translateX(-50%);
-}
-.h-row.multi::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: 3px; background: var(--border);
+/* Level-specific styling */
+.level-0 .item-toggle {
+  background: linear-gradient(135deg, var(--red) 0%, #A0082A 100%);
+  border-color: var(--red);
+  box-shadow: 0 4px 12px rgba(200,16,46,0.15);
 }
 
-.child-col { display: flex; flex-direction: column; align-items: center; position: relative; }
-.child-col::before {
-  content: ''; position: absolute; top: 0; left: 50%;
-  width: 3px; height: 28px; background: var(--border); transform: translateX(-50%);
+.level-0 .item-toggle:hover {
+  box-shadow: 0 6px 16px rgba(200,16,46,0.25);
 }
 
-.collapsed { display: none !important; }
-.dimmed { opacity: 0.2 !important; }
-.highlighted { 
-  outline: 3px solid var(--gold) !important; 
-  outline-offset: 3px;
+.level-0 .item-name {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 18px;
+  color: white;
+}
+
+.level-0 .item-title {
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+}
+
+.level-0 .toggle-icon {
+  background: rgba(255,255,255,0.3);
+}
+
+.level-0 .item-badge {
+  background: rgba(255,255,255,0.3);
+}
+
+.level-1 .item-toggle {
+  background: linear-gradient(to right, rgba(139,26,46,0.05) 0%, white 15%);
+  border-left: 4px solid #8B1A2E;
+  padding-left: 14px;
+  margin-left: 16px;
+}
+
+.level-2 .item-toggle {
+  background: linear-gradient(to right, rgba(26,75,140,0.05) 0%, white 15%);
+  border-left: 4px solid #1A4B8C;
+  padding-left: 14px;
+  margin-left: 32px;
+}
+
+.level-3 .item-toggle {
+  background: linear-gradient(to right, rgba(26,102,68,0.05) 0%, white 15%);
+  border-left: 4px solid #1A6644;
+  padding-left: 14px;
+  margin-left: 48px;
+}
+
+.level-4 .item-toggle {
+  background: linear-gradient(to right, rgba(122,92,30,0.05) 0%, white 15%);
+  border-left: 4px solid #7A5C1E;
+  padding-left: 14px;
+  margin-left: 64px;
+}
+
+.children-list {
+  max-height: 100000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.children-list.collapsed {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.tree-item.hidden {
+  display: none;
+}
+
+.tree-item.dimmed .item-toggle {
+  opacity: 0.15;
+}
+
+.tree-item.highlighted .item-toggle {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
   box-shadow: 0 0 0 6px rgba(255,205,0,0.15) !important;
-}
-
-@media (max-width: 2560px) {
-  html { font-size: 16px; }
-}
-
-@media (min-width: 2560px) {
-  html { font-size: 18px; }
 }
 
 @media print {
   #header .toolbar { display: none; }
   #legend .hint { display: none; }
   body { background: white; }
-  #canvas { padding: 24px; }
-  .node { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  #container { padding: 24px; }
+  .item-toggle { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 }
 </style>
 </head>
@@ -249,10 +316,10 @@ body {
   <div class="leg"><div class="leg-dot" style="background:#1A4B8C"></div> Direct Reports</div>
   <div class="leg"><div class="leg-dot" style="background:#1A6644"></div> L3 Management</div>
   <div class="leg"><div class="leg-dot" style="background:#7A5C1E"></div> L4+ Individual Contributors</div>
-  <span class="hint">💡 Click cards for details • Use ±  to expand/collapse</span>
+  <span class="hint">💡 Click to expand/collapse • Search to filter</span>
 </div>
 
-<div id="canvas"></div>
+<div id="container"></div>
 
 <script>
 const ORG_DATA = [
@@ -338,115 +405,189 @@ const ORG_DATA = [
   { name: "Kristina DeGeare", reportsTo: "David Ritenour", title: "EA to David Ritenour", isEA: true },
 ];
 
-function buildTree() {
+let expandedItems = new Set();
+let allItems = [];
+
+function buildHierarchy() {
   const byName = {};
-  ORG_DATA.forEach(p => { byName[p.name] = { ...p, children: [] }; });
+  ORG_DATA.forEach(p => { 
+    byName[p.name] = { ...p, children: [], level: 0 }; 
+  });
+  
   let root = null;
   ORG_DATA.forEach(p => {
-    if (!p.reportsTo) { root = byName[p.name]; }
-    else if (byName[p.reportsTo]) { byName[p.reportsTo].children.push(byName[p.name]); }
+    if (!p.reportsTo) { 
+      root = byName[p.name]; 
+    } else if (byName[p.reportsTo]) { 
+      byName[p.reportsTo].children.push(byName[p.name]);
+    }
   });
+
+  function assignLevels(node, level = 0) {
+    node.level = level;
+    node.children.forEach(c => assignLevels(c, level + 1));
+  }
+  
+  assignLevels(root);
   return root;
 }
 
-function assignLevels(node, level = 0) {
-  node.level = level;
-  node.children.forEach(c => assignLevels(c, level + 1));
-}
+function renderTree(node, container) {
+  const itemEl = document.createElement('div');
+  itemEl.className = `tree-item level-${Math.min(node.level, 4)}`;
+  itemEl.dataset.name = node.name.toLowerCase();
+  itemEl.dataset.title = (node.title || '').toLowerCase();
+  itemEl.id = `item-${node.name.replace(/\s+/g, '-')}`;
+  
+  allItems.push(itemEl);
 
-function renderNode(node) {
-  const block = document.createElement('div');
-  block.className = 'node-block';
+  // Toggle
+  const toggle = document.createElement('div');
+  toggle.className = 'item-toggle';
 
-  const card = document.createElement('div');
-  card.className = 'node';
-  card.dataset.level = Math.min(node.level, 4);
-  card.dataset.name = node.name.toLowerCase();
-  card.dataset.title = (node.title || '').toLowerCase();
+  const icon = document.createElement('div');
+  icon.className = node.children.length > 0 ? 'toggle-icon' : 'toggle-icon no-children';
+  icon.textContent = node.children.length > 0 ? '▼' : '·';
+  toggle.appendChild(icon);
 
-  let inner = '';
-  if (node.isEA) inner += '<div class="ea-tag">EA</div>';
-  const badge = node.children.length ? `<span class="badge">${node.children.length}</span>` : '';
-  inner += `<div class="node-name">${node.name}${badge}</div>`;
-  if (node.title) inner += `<div class="node-title">${node.title}</div>`;
-  if (node.notes) inner += `<div class="node-notes">${node.notes}</div>`;
-  card.innerHTML = inner;
+  // Content
+  const content = document.createElement('div');
+  content.className = 'item-content';
+
+  const name = document.createElement('div');
+  name.className = 'item-name';
+  name.textContent = node.name;
+  content.appendChild(name);
+
+  const badges = document.createElement('div');
+  badges.style.display = 'flex';
+  badges.style.gap = '8px';
+  badges.style.marginTop = '4px';
+  badges.style.alignItems = 'center';
+  badges.style.flexWrap = 'wrap';
+
+  if (node.isEA) {
+    const eaBadge = document.createElement('div');
+    eaBadge.className = 'ea-badge';
+    eaBadge.textContent = 'Executive Assistant';
+    badges.appendChild(eaBadge);
+  }
+
+  const title = document.createElement('div');
+  title.className = 'item-title';
+  title.textContent = node.title;
+  badges.appendChild(title);
+
+  if (node.children.length > 0) {
+    const countBadge = document.createElement('div');
+    countBadge.className = 'item-badge';
+    countBadge.textContent = `${node.children.length} direct report${node.children.length !== 1 ? 's' : ''}`;
+    badges.appendChild(countBadge);
+  }
+
+  content.appendChild(badges);
 
   if (node.notes) {
-    card.addEventListener('click', e => {
-      if (e.target.classList.contains('tog')) return;
-      card.classList.toggle('open');
-    });
+    const notes = document.createElement('div');
+    notes.className = 'item-notes';
+    notes.textContent = node.notes;
+    content.appendChild(notes);
   }
 
-  block.appendChild(card);
+  toggle.appendChild(content);
+  itemEl.appendChild(toggle);
 
-  if (node.children.length) {
-    const tog = document.createElement('div');
-    tog.className = 'tog';
-    tog.textContent = '-';
-    tog.addEventListener('click', e => {
-      e.stopPropagation();
-      const wrap = block.querySelector(':scope > .children-wrap');
-      const isNowCollapsed = wrap.classList.toggle('collapsed');
-      tog.textContent = isNowCollapsed ? '+' : '-';
-    });
-    card.appendChild(tog);
-
-    const wrap = document.createElement('div');
-    wrap.className = 'children-wrap';
-
-    const vLine = document.createElement('div');
-    vLine.className = 'v-line';
-    wrap.appendChild(vLine);
-
-    const row = document.createElement('div');
-    row.className = `h-row${node.children.length > 1 ? ' multi' : ''}`;
-
+  // Children
+  if (node.children.length > 0) {
+    const childrenList = document.createElement('div');
+    childrenList.className = 'children-list';
+    
     node.children.forEach(child => {
-      const col = document.createElement('div');
-      col.className = 'child-col';
-      col.appendChild(renderNode(child));
-      row.appendChild(col);
+      renderTree(child, childrenList);
     });
 
-    wrap.appendChild(row);
-    block.appendChild(wrap);
+    itemEl.appendChild(childrenList);
+
+    // Toggle behavior
+    toggle.addEventListener('click', () => {
+      childrenList.classList.toggle('collapsed');
+      icon.classList.toggle('collapsed');
+      
+      if (childrenList.classList.contains('collapsed')) {
+        expandedItems.delete(node.name);
+      } else {
+        expandedItems.add(node.name);
+      }
+    });
+
+    // Start collapsed except level 0 and 1
+    if (node.level > 1) {
+      childrenList.classList.add('collapsed');
+      icon.classList.add('collapsed');
+    } else {
+      expandedItems.add(node.name);
+    }
   }
 
-  return block;
+  container.appendChild(itemEl);
 }
 
 function expandAll() {
-  document.querySelectorAll('.children-wrap').forEach(w => w.classList.remove('collapsed'));
-  document.querySelectorAll('.tog').forEach(t => t.textContent = '-');
+  document.querySelectorAll('.children-list').forEach(list => {
+    list.classList.remove('collapsed');
+  });
+  document.querySelectorAll('.toggle-icon').forEach(icon => {
+    icon.classList.remove('collapsed');
+  });
 }
 
 function collapseAll() {
-  document.querySelectorAll('.children-wrap').forEach(w => w.classList.add('collapsed'));
-  document.querySelectorAll('.tog').forEach(t => t.textContent = '+');
+  document.querySelectorAll('.children-list').forEach(list => {
+    list.classList.add('collapsed');
+  });
+  document.querySelectorAll('.toggle-icon').forEach(icon => {
+    icon.classList.add('collapsed');
+  });
 }
 
 function doSearch(q) {
   q = q.trim().toLowerCase();
-  const allCards = document.querySelectorAll('.node');
-  if (!q) {
-    allCards.forEach(c => c.classList.remove('dimmed', 'highlighted'));
-    return;
-  }
-  allCards.forEach(card => {
-    const match = card.dataset.name.includes(q) || card.dataset.title.includes(q);
-    card.classList.toggle('dimmed', !match);
-    card.classList.toggle('highlighted', match);
+  
+  allItems.forEach(item => {
+    item.classList.remove('dimmed', 'highlighted', 'hidden');
+  });
+
+  if (!q) return;
+
+  const matching = new Set();
+  allItems.forEach(item => {
+    const match = item.dataset.name.includes(q) || item.dataset.title.includes(q);
     if (match) {
-      let el = card.parentElement;
-      while (el) {
-        if (el.classList.contains('children-wrap')) {
-          el.classList.remove('collapsed');
-          const togEl = el.previousElementSibling && el.previousElementSibling.querySelector('.tog');
-          if (togEl) togEl.textContent = '-';
+      matching.add(item.id);
+      item.classList.add('highlighted');
+    }
+  });
+
+  allItems.forEach(item => {
+    if (!matching.has(item.id)) {
+      item.classList.add('dimmed');
+    }
+  });
+
+  // Expand parents of matches
+  allItems.forEach(item => {
+    if (matching.has(item.id)) {
+      let parent = item.parentElement;
+      while (parent) {
+        if (parent.classList.contains('tree-item')) {
+          const childrenList = parent.querySelector(':scope > .children-list');
+          if (childrenList) {
+            childrenList.classList.remove('collapsed');
+            const icon = parent.querySelector('.toggle-icon');
+            if (icon) icon.classList.remove('collapsed');
+          }
         }
-        el = el.parentElement;
+        parent = parent.parentElement;
       }
     }
   });
@@ -454,12 +595,9 @@ function doSearch(q) {
 
 document.getElementById('searchInput').addEventListener('input', (e) => doSearch(e.target.value));
 
-const root = buildTree();
-assignLevels(root);
-const tree = document.createElement('div');
-tree.className = 'tree';
-tree.appendChild(renderNode(root));
-document.getElementById('canvas').appendChild(tree);
+const root = buildHierarchy();
+const container = document.getElementById('container');
+renderTree(root, container);
 </script>
 
 </body>
