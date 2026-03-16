@@ -108,7 +108,7 @@ body {
 
 .item-toggle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
   background: white;
@@ -123,6 +123,12 @@ body {
   background: #FAFAF8;
   border-color: var(--red);
   box-shadow: 0 2px 8px var(--shadow);
+}
+
+.has-ea .item-toggle {
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .toggle-icon {
@@ -325,10 +331,49 @@ body {
   opacity: 0.15;
 }
 
+.tree-item.dimmed .ea-item {
+  opacity: 0.15;
+}
+
 .tree-item.highlighted .item-toggle {
   outline: 3px solid var(--gold);
   outline-offset: 2px;
   box-shadow: 0 0 0 6px rgba(255,205,0,0.15) !important;
+}
+
+.ea-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #FAFAF8;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.ea-item:hover {
+  background: #F5F3F0;
+}
+
+.ea-icon {
+  width: 8px;
+  height: 8px;
+  background: #999;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ea-name {
+  font-weight: 600;
+  color: #000;
+}
+
+.ea-role {
+  color: #888;
+  font-size: 12px;
 }
 
 @media print {
@@ -482,6 +527,9 @@ function buildHierarchy() {
 }
 
 function renderTree(node, container) {
+  // Skip EAs - they'll be rendered inline with their boss
+  if (node.isEA) return;
+
   const itemEl = document.createElement('div');
   itemEl.className = `tree-item level-${Math.min(node.level, 4)}`;
   itemEl.dataset.name = node.name.toLowerCase();
@@ -490,13 +538,21 @@ function renderTree(node, container) {
   
   allItems.push(itemEl);
 
+  // Find EAs that report to this person
+  const eas = node.children.filter(c => c.isEA);
+  const regularChildren = node.children.filter(c => !c.isEA);
+
+  if (eas.length > 0) {
+    itemEl.classList.add('has-ea');
+  }
+
   // Toggle
   const toggle = document.createElement('div');
   toggle.className = 'item-toggle';
 
   const icon = document.createElement('div');
-  icon.className = node.children.length > 0 ? 'toggle-icon' : 'toggle-icon no-children';
-  icon.textContent = node.children.length > 0 ? '▼' : '·';
+  icon.className = regularChildren.length > 0 ? 'toggle-icon' : 'toggle-icon no-children';
+  icon.textContent = regularChildren.length > 0 ? '▼' : '·';
   toggle.appendChild(icon);
 
   // Content
@@ -515,22 +571,15 @@ function renderTree(node, container) {
   badges.style.alignItems = 'center';
   badges.style.flexWrap = 'wrap';
 
-  if (node.isEA) {
-    const eaBadge = document.createElement('div');
-    eaBadge.className = 'ea-badge';
-    eaBadge.textContent = 'Executive Assistant';
-    badges.appendChild(eaBadge);
-  }
-
   const title = document.createElement('div');
   title.className = 'item-title';
   title.textContent = node.title;
   badges.appendChild(title);
 
-  if (node.children.length > 0) {
+  if (regularChildren.length > 0) {
     const countBadge = document.createElement('div');
     countBadge.className = 'item-badge';
-    countBadge.textContent = `${node.children.length} direct report${node.children.length !== 1 ? 's' : ''}`;
+    countBadge.textContent = `${regularChildren.length} report${regularChildren.length !== 1 ? 's' : ''}`;
     badges.appendChild(countBadge);
   }
 
@@ -546,12 +595,36 @@ function renderTree(node, container) {
   toggle.appendChild(content);
   itemEl.appendChild(toggle);
 
-  // Children
-  if (node.children.length > 0) {
+  // EAs inline
+  if (eas.length > 0) {
+    eas.forEach(ea => {
+      const eaEl = document.createElement('div');
+      eaEl.className = 'ea-item';
+      
+      const dot = document.createElement('div');
+      dot.className = 'ea-icon';
+      eaEl.appendChild(dot);
+
+      const eaName = document.createElement('div');
+      eaName.className = 'ea-name';
+      eaName.textContent = ea.name;
+      eaEl.appendChild(eaName);
+
+      const eaRole = document.createElement('div');
+      eaRole.className = 'ea-role';
+      eaRole.textContent = ea.title;
+      eaEl.appendChild(eaRole);
+
+      itemEl.appendChild(eaEl);
+    });
+  }
+
+  // Children (non-EA)
+  if (regularChildren.length > 0) {
     const childrenList = document.createElement('div');
     childrenList.className = 'children-list';
     
-    node.children.forEach(child => {
+    regularChildren.forEach(child => {
       renderTree(child, childrenList);
     });
 
