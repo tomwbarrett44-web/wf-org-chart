@@ -125,11 +125,7 @@ body {
   box-shadow: 0 2px 8px var(--shadow);
 }
 
-.has-ea .item-toggle {
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
+
 
 .toggle-icon {
   width: 24px;
@@ -341,39 +337,17 @@ body {
   box-shadow: 0 0 0 6px rgba(255,205,0,0.15) !important;
 }
 
-.ea-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: #FAFAF8;
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  font-size: 13px;
-  color: #666;
-}
-
-.ea-item:hover {
-  background: #F5F3F0;
-}
-
-.ea-icon {
-  width: 8px;
-  height: 8px;
-  background: #999;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.ea-name {
-  font-weight: 600;
-  color: #000;
-}
-
-.ea-role {
-  color: #888;
+.ea-inline {
   font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #E5E1D8;
+}
+
+.ea-inline strong {
+  color: #000;
+  font-weight: 600;
 }
 
 @media print {
@@ -595,28 +569,15 @@ function renderTree(node, container) {
   toggle.appendChild(content);
   itemEl.appendChild(toggle);
 
-  // EAs inline
+  // EAs inline in content
   if (eas.length > 0) {
-    eas.forEach(ea => {
-      const eaEl = document.createElement('div');
-      eaEl.className = 'ea-item';
-      
-      const dot = document.createElement('div');
-      dot.className = 'ea-icon';
-      eaEl.appendChild(dot);
-
-      const eaName = document.createElement('div');
-      eaName.className = 'ea-name';
-      eaName.textContent = ea.name;
-      eaEl.appendChild(eaName);
-
-      const eaRole = document.createElement('div');
-      eaRole.className = 'ea-role';
-      eaRole.textContent = ea.title;
-      eaEl.appendChild(eaRole);
-
-      itemEl.appendChild(eaEl);
-    });
+    const eaDiv = document.createElement('div');
+    eaDiv.className = 'ea-inline';
+    
+    const eaText = eas.map(ea => `<strong>${ea.name}</strong> | ${ea.title}`).join('<br>');
+    eaDiv.innerHTML = eaText;
+    
+    content.appendChild(eaDiv);
   }
 
   // Children (non-EA)
